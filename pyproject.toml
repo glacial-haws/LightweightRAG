@@ -1,0 +1,85 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "LightweightRAG"
+version = "0.1.0"
+description = "Lightweight Retrieval-Augmented Generation for Contract Question-Answering on Local Hardware"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "commentjson",
+    "einops==0.8.1",
+    "fastapi",
+    "jinja2",
+    "llama-index==0.12.24",
+    "llama-index-embeddings-huggingface==0.5.2",
+    "llama-index-embeddings-instructor==0.3.0",
+    "openpyxl",
+    "portalocker",
+    "pydantic",
+    "python-dotenv",  
+    "pyyaml",
+    "rank_bm25==0.2.2", 
+    "seaborn", 
+    "torch==2.6.0",
+    "uvicorn",
+    "streamlit",
+    "wandb==0.19.8",
+    # Only install mlx on macOS ARM64
+    "mlx==0.23.2; sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "mlx-lm==0.22.0; sys_platform == 'darwin' and platform_machine == 'arm64'",    
+]
+
+[project.optional-dependencies] 
+dev = [
+    "marker-pdf",
+    "matplotlib",
+    "nltk==3.9.1",
+    "pandas",
+    "rouge-score==0.1.2",
+    "pikepdf",
+    "pypdf2==3.0.1",
+    "xlsxwriter",
+]
+test = [
+    "pytest",
+    "pytest-mock",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["LightweightRAG"]
+
+[tool.ruff]
+# Folders
+src = ["."]
+extend-include = ["*.py", "*.pyi", "**/pyproject.toml"]
+
+# Basic configuration
+line-length = 120
+indent-width = 4
+
+target-version = "py312"  # Adjust to your Python version
+exclude = ["venv", ".venv", "build", "dist", "__pycache__"]
+
+# Rules
+select = [
+    "F",    # Pyflakes (undefined names, unused imports, etc.)
+    "E",    # pycodestyle errors
+    "I",    # isort (import sorting)
+    "B",    # flake8-bugbear (common bugs, best practices)
+    "ASYNC",# flake8-async (async best practices)
+    "RUF",  # Ruff-specific rules
+]
+ignore = [
+    "E501",      # line too long (optional, if you're OK with longer lines)
+    "E701",     # multiple statements on one line (colon)
+]
+
+# Preserve specific formatting
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LlamaIndex Statistics Report</title>
+    <style>
+        {% include 'dark_mode.css' %}
+    </style>
+</head>
+<body>
+    <h1>LlamaIndex Statistics Report</h1>
+    <p>Report generated on {{ generation_time }}</p>
+    <p>Embedding model: <strong>{{ model_name }}</strong></p>
+    
+    {% if stored_params %}
+    <div class="container">
+        <div class="card">
+            <h3>Index Creation Parameters</h3>
+            <table>
+                {% if stored_params.creation_time %}
+                <tr><td>Creation Time</td><td>{{ stored_params.creation_time }}</td></tr>
+                {% endif %}
+                {% if stored_params.chunk_size %}
+                <tr><td>Chunk Size</td><td>{{ stored_params.chunk_size }}</td></tr>
+                {% endif %}
+                {% if stored_params.chunk_overlap %}
+                <tr><td>Chunk Overlap</td><td>{{ stored_params.chunk_overlap }}</td></tr>
+                {% endif %}
+                {% if stored_params.splitter_type %}
+                <tr><td>Splitter Type</td><td>{{ stored_params.splitter_type }}</td></tr>
+                {% endif %}
+                {% if stored_params.query_instruction %}
+                <tr><td>Query Instruction</td><td>{{ stored_params.query_instruction }}</td></tr>
+                {% endif %}
+                {% if stored_params.text_instruction %}
+                <tr><td>Text Instruction</td><td>{{ stored_params.text_instruction }}</td></tr>
+                {% endif %}
+                {% if ingestion_time %}
+                <tr><td>Ingestion Time [sec]</td><td>{{ ingestion_time }}</td></tr>
+                {% endif %}
+                {% if persist_dir %}
+                <tr><td>Persist Directory</td><td>{{ persist_dir }}</td></tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    
+    <h2>Overview</h2>
+    <div class="container">
+        <div class="card">
+            <div class="label">Total Chunks</div>
+            <div class="stat">{{ stats.total_chunks }}</div>
+        </div>
+        <div class="card">
+            <div class="label">Total Words</div>
+            <div class="stat">{{ stats.total_words|format_number }}</div>
+        </div>
+        <div class="card">
+            <div class="label">Total Characters</div>
+            <div class="stat">{{ stats.total_chars|format_number }}</div>
+        </div>
+        <div class="card">
+            <div class="label">Estimated Total Tokens</div>
+            <div class="stat">{{ stats.total_tokens_est|format_number }}</div>
+        </div>
+    </div>
+    
+    <h2>Chunk Statistics</h2>
+    <div class="container">
+        <div class="card">
+            <h3>Character Counts</h3>
+            <table>
+                <tr><td>Average</td><td>{{ stats.avg_chars_per_chunk|round(1) }}</td></tr>
+                <tr><td>Minimum</td><td>{{ stats.min_chars }}</td></tr>
+                <tr><td>Maximum</td><td>{{ stats.max_chars }}</td></tr>
+                <tr><td>Standard Deviation</td><td>{{ stats.std_dev_chars|round(1) }}</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>Word Counts</h3>
+            <table>
+                <tr><td>Average</td><td>{{ stats.avg_words_per_chunk|round(1) }}</td></tr>
+                <tr><td>Minimum</td><td>{{ stats.min_words }}</td></tr>
+                <tr><td>Maximum</td><td>{{ stats.max_words }}</td></tr>
+                <tr><td>Standard Deviation</td><td>{{ stats.std_dev_words|round(1) }}</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>Token Estimates</h3>
+            <table>
+                <tr><td>Average Tokens per Chunk</td><td>{{ stats.avg_tokens_per_chunk|round(1) }}</td></tr>
+                <tr><td>Tokens per Character (est.)</td><td>0.25</td></tr>
+                <tr><td>Tokens per Word (est.)</td><td>{{ (stats.avg_tokens_per_chunk / stats.avg_words_per_chunk)|round(2) }}</td></tr>
+            </table>
+        </div>
+    </div>
+    
+    {% if stats.bm25 %}
+    <h2>BM25 Statistics</h2>
+    <div class="container">
+        <div class="card">
+            <h3>BM25 Configuration</h3>
+            <table>
+                <tr><td>Config String</td><td>{{ stats.bm25.config.configstr }}</td></tr>
+                <tr><td>From Cache</td><td>{{ stats.bm25.config.from_cache }}</td></tr>
+                <tr><td>Number of Documents</td><td>{{ stats.bm25.config.num_documents }}</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>BM25 Parameters</h3>
+            <table>
+                <tr><td>k1</td><td>{{ stats.bm25.parameters.k1 }}</td></tr>
+                <tr><td>b</td><td>{{ stats.bm25.parameters.b }}</td></tr>
+                <tr><td>epsilon</td><td>{{ stats.bm25.parameters.epsilon }}</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>Token Statistics</h3>
+            <table>
+                <tr><td>Total Tokens</td><td>{{ stats.bm25.corpus_stats.total_tokens|format_number }}</td></tr>
+                <tr><td>Unique Tokens</td><td>{{ stats.bm25.corpus_stats.unique_tokens|format_number }}</td></tr>
+                <tr><td>Average Tokens per Document</td><td>{{ stats.bm25.corpus_stats.avg_tokens_per_doc|round(1) }}</td></tr>
+                <tr><td>Minimum Tokens</td><td>{{ stats.bm25.corpus_stats.min_tokens }}</td></tr>
+                <tr><td>Maximum Tokens</td><td>{{ stats.bm25.corpus_stats.max_tokens }}</td></tr>
+                <tr><td>Standard Deviation</td><td>{{ stats.bm25.corpus_stats.std_dev_tokens|round(1) }}</td></tr>
+                <tr><td>Average Unique Tokens</td><td>{{ stats.bm25.corpus_stats.avg_unique_tokens|round(1) }}</td></tr>
+                <tr><td>Average IDF</td><td>{{ stats.bm25.vocabulary.avg_idf|round(3) }}</td></tr>
+            </table>
+        </div>
+    </div>
+    
+    <h3>Top BM25 Tokens</h3>
+    <div class="card">
+        <table>
+            <tr>
+                <th>Token</th>
+                <th>Frequency</th>
+                <th>IDF Value</th>
+            </tr>
+            {% for token, freq in stats.bm25.vocabulary.top_tokens.items() %}
+                {% if loop.index <= 20 %}
+                <tr>
+                    <td>{{ token }}</td>
+                    <td>{{ freq }}</td>
+                    <td>{{ stats.bm25.vocabulary.idf_sample.get(token, 'N/A')|round(3) if stats.bm25.vocabulary.idf_sample.get(token) != 'N/A' else 'N/A' }}</td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+    
+    {% if visualizations %}
+    <h2>Visualizations</h2>
+    <div class="container">
+        {% if visualizations.char_distribution %}
+        <div class="card">
+            <h3>Character Count Distribution</h3>
+            <div class="visualization">
+                <img src="data:image/png;base64,{{ visualizations.char_distribution }}" alt="Character Count Distribution">
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if visualizations.word_distribution %}
+        <div class="card">
+            <h3>Word Count Distribution</h3>
+            <div class="visualization">
+                <img src="data:image/png;base64,{{ visualizations.word_distribution }}" alt="Word Count Distribution">
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="container">
+        {% if visualizations.source_distribution %}
+        <div class="card">
+            <h3>Source Distribution</h3>
+            <div class="visualization">
+                <img src="data:image/png;base64,{{ visualizations.source_distribution }}" alt="Source Distribution">
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if visualizations.word_frequency %}
+        <div class="card">
+            <h3>Word Frequency</h3>
+            <div class="visualization">
+                <img src="data:image/png;base64,{{ visualizations.word_frequency }}" alt="Word Frequency">
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <h2>Source Distribution</h2>
+    <div class="card">
+        <table>
+            <tr>
+                <th>Source</th>
+                <th>Chunks</th>
+                <th>Percentage</th>
+            </tr>
+            {% for source, count in sorted_sources %}
+            <tr>
+                <td>{{ source }}</td>
+                <td>{{ count }}</td>
+                <td>{{ ((count / stats.total_chunks) * 100)|round(1) }}%</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    
+    <h2>Sample Chunks</h2>
+    {% if stats.sample_chunks %}
+        {% for chunk in stats.sample_chunks %}
+        <div class="card">
+            <h3>Chunk {{ loop.index }}</h3>
+            <div class="chunk-stats">
+                <p><strong>Source:</strong> {{ chunk.source }}</p>
+                <p><strong>Characters:</strong> {{ chunk.char_count }}</p>
+                <p><strong>Words:</strong> {{ chunk.word_count }}</p>
+                <p><strong>Tokens (est.):</strong> {{ chunk.token_count }}</p>
+            </div>
+            <div class="chunk-content">
+                <h4>Content:</h4>
+                <pre style="white-space: pre-wrap; background-color: #272c33; padding: 10px; border-radius: 5px; max-height: 300px; overflow-y: auto;">{{ chunk.content }}</pre>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="card">
+        <p>No chunks available to display.</p>
+    </div>
+    {% endif %}
+    
+    <div class="footer">
+        <p>Generated by LlamaIndex Statistics Report Generator</p>
+    </div>
+</body>
+</html>

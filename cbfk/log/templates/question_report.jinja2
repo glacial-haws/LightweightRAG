@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index Response Visualization</title>
+    <style>
+        {% include 'dark_mode.css' %}
+    </style>
+</head>
+<body>
+<div class="cbfk-report">
+    <div class="container">
+        <div class="section">
+            <div class="query">{{ query }}</div>
+            <div class="experiment-id">Experiment ID: {{ experiment_id }}</div>
+            <h3>Expected Answer</h3>
+            <div class="expected-answer">{{ expected_answer }}</div>
+            {% if has_query_rewrite %}
+            <h3>Query Rewrite</h3>
+            <div class="expected-answer">{{ query_rewrite }}</div>
+            {% endif %}
+            <div class="scores">
+                <div class="score-item">
+                    <div class="score-label">Recall</div>
+                    <div class="score-value {{ 'good-score' if recall >= 0.7 else 'medium-score' if recall >= 0.4 else 'poor-score' }}">
+                        {{ "%.2f"|format(recall) }}
+                    </div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">RR</div>
+                    <div class="score-value {{ 'good-score' if rr >= 0.7 else 'medium-score' if rr >= 0.4 else 'poor-score' }}">
+                        {{ "%.2f"|format(rr) }}
+                    </div>
+                </div>
+                {% if graded_accuracy is defined %}
+                <div class="score-item">
+                    <div class="score-label">Graded Accuracy</div>
+                    <div class="score-value {{ 'good-score' if graded_accuracy >= 0.7 else 'medium-score' if graded_accuracy >= 0.4 else 'poor-score' }}">
+                        {{ "%.2f"|format(graded_accuracy) }}
+                    </div>                 
+                </div>
+                {% endif %}
+                {% if source_score is defined %}
+                <div class="score-item">
+                    <div class="score-label">Source Score</div>
+                    <div class="score-value {{ 'good-score' if source_score >= 0.7 else 'medium-score' if source_score >= 0.4 else 'poor-score' }}">
+                        {{ "%.2f"|format(source_score) }}
+                    </div>                 
+                </div>
+                {% endif %}
+
+            </div>
+            {% if llm_response %}
+            <h3>LLM Answer</h3>
+            <div class="score-item">
+                <div class="expected-answer">{{ llm_response|safe }}</div>
+            </div>
+            {% endif %}
+            {% if eval_response %}
+            <div class="eval-response-wrapper">
+                <div class="eval-response-content">
+                    {{ eval_response }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="section">
+            <h2>Index Response Chunks</h2>
+            <div class="source-nodes">
+                {% for i, node in enumerate(highlighted_source_nodes) %}
+                <div class="source-node">
+                    <div class="source-header">
+                        <span>Nr. {{ i+1 }}</span>
+                        <span>Source: {{ node.source }} § {{ node.chapter }}</span>
+                        <span>Score: {{ "%.4f"|format(node.score) }}</span>
+                        <span>Retriever Score: {% if node.retriever_score is defined and node.retriever_score is number %}{{ "%.4f"|format(node.retriever_score) }}{% else %}unknown{% endif %}</span>
+                        <span>Retriever: {{ node.retriever_source if node.retriever_source is defined else 'unknown' }}</span>
+                        <span>Origin: {{ node.origin if node.origin is defined else 'unknown' }}</span>
+                    </div>
+                    <div class="source-content">{{ node.text|safe }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Prompt</h2>
+            <pre class="code-block"><code>{{ prompt }}</code></pre>
+        </div>
+        <div class="footer">
+            Generated at {{ generation_time }}
+        </div>
+    </div>
+</body>
+</html>

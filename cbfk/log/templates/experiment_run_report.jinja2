@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        {% include 'dark_mode.css' %}
+    </style>
+</head>
+<body>
+    <h2>Experiment Run Report</h2>
+    <table>
+        <tr>
+            <th>Experiment ID</th>
+            <td>{{ experiment_id }}</td>
+        </tr>
+        <tr>
+            <th>AverageRecall</th>
+            <td>{{ "%.2f"|format(recall) }}</td>
+        </tr>
+        <tr>
+            <th>Medium Reciprocal Rank</th>
+            <td>{{ "%.2f"|format(mrr) }}</td>
+        </tr>
+        <tr>
+            <th>Average Graded Accuracy</th>
+            <td>{{ "%.2f"|format(graded_accuracy) }}</td>
+        </tr>
+        <tr>
+            <th>Average Source Score</th>
+            <td>{{ "%.2f"|format(source_score) }}</td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Query</th>
+            {% if has_query_rewrite %}
+            <th>Query Rewrite</th>
+            {% endif %}
+            <th>Recall</th>
+            <th>Reciprocal Rank</th>
+            <th>LLM Graded Accuracy</th>
+            <th>Source Score</th>
+            <th>LLM Response</th>
+        </tr>
+        {% for result in query_results %}
+        <tr>
+            <td>{{ loop.index-1 }}</td>
+            <td>{{ result.query }}</td>
+            {% if has_query_rewrite %}
+            <td>{{ result.query_rewrite }}</td>
+            {% endif %}
+            <td class="score {{ 'good-score' if result.recall >= 0.7 else 'medium-score' if result.recall >= 0.4 else 'poor-score' }}">{{ "%.2f"|format(result.recall) }}</td>
+            <td class="score {{ 'good-score' if result.rr >= 0.5 else 'medium-score' if result.rr >= 0.2 else 'poor-score' }}">{{ "%.2f"|format(result.rr) }}</td>
+            <td class="score {{ 'good-score' if result.graded_accuracy >= 0.7 else 'medium-score' if result.graded_accuracy >= 0.4 else 'poor-score' }}">{{ "%.2f"|format(result.graded_accuracy|default(0)) }}</td>
+            <td class="score {{ 'good-score' if result.source_score >= 0.7 else 'medium-score' if result.source_score >= 0.4 else 'poor-score' }}">{{ "%.2f"|format(result.source_score) }}</td>
+            <td>{{ result.llm_response|truncate(120) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
